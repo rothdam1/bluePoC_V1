@@ -1,5 +1,8 @@
 
+import com.intel.bluetooth.SelectServiceHandler;
+
 import javax.bluetooth.*;
+import javax.microedition.io.Connection;
 import javax.microedition.io.StreamConnection;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,7 +26,39 @@ public class BluePoC {
         }
 
         LocalDevice localDevice = LocalDevice.getLocalDevice();
+        Connection connection = new com.intel.bluetooth.btspp.Connection();
+        System.out.println("Local adress" + localDevice.getBluetoothAddress());
+        System.out.println("mode "+ localDevice.getDiscoverable());
+        localDevice.setDiscoverable(10390323);//GIAC
+        DiscoveryAgent discoveryAgent = localDevice.getDiscoveryAgent();
+        DiscoveryListener discoveryListener = new DiscoveryListener() {
+            @Override
+            public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
+                System.out.println("Device "+ btDevice);
+                System.out.println("code"+cod);
+            }
 
+            @Override
+            public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+                System.out.println("Device "+ transID);
+                System.out.println("code"+servRecord);
+            }
+
+            @Override
+            public void serviceSearchCompleted(int transID, int respCode) {
+
+            }
+
+            @Override
+            public void inquiryCompleted(int discType) {
+
+            }
+        };
+        discoveryAgent.startInquiry(DiscoveryAgent.GIAC,discoveryListener);
+        Thread.sleep(5000);
+        for ( RemoteDevice remoteDevice : discoveryAgent.retrieveDevices(DiscoveryAgent.CACHED)){
+            System.out.println("Address: = "+ remoteDevice.getBluetoothAddress() + "name = " + remoteDevice.getFriendlyName(false) + "state " + remoteDevice.isTrustedDevice() );
+        }
         /*
         if (!localDevice.setDiscoverable(DiscoveryAgent.GIAC)) {
             System.err.println("Couldnt set discoverable");
@@ -51,7 +86,7 @@ public class BluePoC {
         var client = new PoCClient();
         final String srvAddr = "A0AFBD29A567";
         final String srvUUID = PoCService.serviceUUID.toString();
-        client.openConnection("btspp://%s:%s".formatted(srvAddr, "4"));
+        //client.openConnection("btspp://%s:%s".formatted(srvAddr, "4"));
 
         /*
         for (var device : devices.values()) {
